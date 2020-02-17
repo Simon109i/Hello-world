@@ -1,2 +1,3 @@
 # Hello-world
-Just another repo
+
+My name is Simon, and I am coming from Slovenia.
