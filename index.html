@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World – Simon</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      overflow-x: hidden;
+      background: linear-gradient(-45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 30px;
+      padding: 50px 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      max-width: 500px;
+      width: 100%;
+      animation: popIn 0.8s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 10vw, 4rem);
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #ff6b6b, #48dbfb, #1dd1a1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: wiggle 3s ease-in-out infinite;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    .wave {
+      display: inline-block;
+      font-size: clamp(2.5rem, 10vw, 4rem);
+      animation: wave 2s infinite;
+      transform-origin: 70% 70%;
+    }
+
+    @keyframes wave {
+      0%, 60%, 100% { transform: rotate(0deg); }
+      10%, 30% { transform: rotate(14deg); }
+      20% { transform: rotate(-8deg); }
+      40% { transform: rotate(-4deg); }
+      50% { transform: rotate(10deg); }
+    }
+
+    p {
+      font-size: clamp(1rem, 4vw, 1.3rem);
+      color: #444;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      color: white;
+      border: none;
+      padding: 15px 35px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 28px rgba(255, 107, 107, 0.5);
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1dd1a1;
+      min-height: 30px;
+    }
+
+    .signature {
+      margin-top: 40px;
+      font-size: 1.4rem;
+      color: #fff;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .signature strong {
+      font-size: 1.8rem;
+      display: block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1><span class="wave">👋</span> Hello World!</h1>
+    <p>Dobrodošli na moji igrivi spletni strani.<br>Klikni gumb za presenečenje!</p>
+    <button class="btn" onclick="presenecenje()">Klikni me! 🎉</button>
+    <div id="message"></div>
+  </div>
+
+  <div class="signature">
+    Ustvaril
+    <strong>Simon ✨</strong>
+  </div>
+
+  <script>
+    const sporocila = [
+      "Super klik! 🚀",
+      "Ti si to! 🌟",
+      "Programiranje je zabava! 💻",
+      "Še enkrat? 🎨",
+      "Odlično! 🎈",
+      "Nadaljuj tako! 🔥"
+    ];
+    let stevec = 0;
+
+    function presenecenje() {
+      const msg = document.getElementById("message");
+      msg.textContent = sporocila[stevec % sporocila.length];
+      stevec++;
+      // majhna animacija ob kliku
+      msg.style.animation = "none";
+      void msg.offsetWidth;
+      msg.style.animation = "popIn 0.4s ease";
+    }
+  </script>
+</body>
+</html>
