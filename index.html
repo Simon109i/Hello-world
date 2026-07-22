@@ -100,12 +100,48 @@
 
     .btn:active { transform: scale(0.97); }
 
+    .game-btn {
+      display: inline-block;
+      text-decoration: none;
+      margin-top: 25px;
+      background: linear-gradient(45deg, #ff9ff3, #a18cd1, #48dbfb);
+      background-size: 200% 200%;
+      color: white;
+      padding: 18px 40px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border-radius: 50px;
+      box-shadow: 0 8px 22px rgba(161, 140, 209, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: shimmer 4s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .game-btn:hover {
+      transform: translateY(-3px) scale(1.06);
+      box-shadow: 0 12px 30px rgba(161, 140, 209, 0.6);
+    }
+
+    .game-btn:active { transform: scale(0.97); }
+
     #message {
       margin-top: 20px;
       font-size: 1.2rem;
       font-weight: bold;
       color: #1dd1a1;
       min-height: 30px;
+    }
+
+    .divider {
+      margin: 30px auto 5px;
+      width: 60%;
+      border: none;
+      border-top: 2px dashed #ddd;
     }
 
     .signature {
@@ -128,6 +164,10 @@
     <p>Dobrodošli na moji igrivi spletni strani.<br>Klikni gumb za presenečenje!</p>
     <button class="btn" onclick="presenecenje()">Klikni me! 🎉</button>
     <div id="message"></div>
+
+    <hr class="divider">
+    <p style="margin-bottom: 0;">Želiš se igrati? 🦄</p>
+    <a class="game-btn" href="samorogi.html">🌈 Igraj Lov na samoroge 🦄</a>
   </div>
 
   <div class="signature">
@@ -137,11 +177,11 @@
 
   <script>
     const sporocila = [
-      "Super Sara :) klik! 🚀",
+      "Super klik! 🚀",
       "Ti si to! 🌟",
       "Programiranje je zabava! 💻",
-      "Še enkrat ? 🎨",
-      "Odlično Maša! 🎈",
+      "Še enkrat? 🎨",
+      "Odlično! 🎈",
       "Nadaljuj tako! 🔥"
     ];
     let stevec = 0;
@@ -150,7 +190,6 @@
       const msg = document.getElementById("message");
       msg.textContent = sporocila[stevec % sporocila.length];
       stevec++;
-      // majhna animacija ob kliku
       msg.style.animation = "none";
       void msg.offsetWidth;
       msg.style.animation = "popIn 0.4s ease";
