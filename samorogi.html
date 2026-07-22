@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Lov na samoroge 🦄</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Trebuchet MS', sans-serif; }
+
+  body {
+    background: linear-gradient(-45deg, #ffd1ff, #fad0c4, #a1c4fd, #c2e9fb, #fbc2eb);
+    background-size: 400% 400%;
+    animation: sky 15s ease infinite;
+    user-select: none;
+    touch-action: none;
+  }
+  @keyframes sky {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; font-size: clamp(1rem, 4vw, 1.5rem); font-weight: bold;
+    color: #7a2e8a; text-shadow: 0 1px 2px rgba(255,255,255,0.7); z-index: 10;
+  }
+  #hud .box {
+    background: rgba(255,255,255,0.7); border-radius: 20px; padding: 6px 16px;
+  }
+
+  .faller {
+    position: absolute; font-size: 3rem; cursor: pointer;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    transition: transform 0.05s;
+  }
+  .faller:active { transform: scale(0.85); }
+
+  .pop {
+    position: absolute; font-weight: bold; font-size: 1.5rem; color: #e84393;
+    pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 20;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-60px); opacity: 0; }
+  }
+
+  .overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: rgba(122, 46, 138, 0.85); color: white; z-index: 100; padding: 20px;
+  }
+  .overlay h1 { font-size: clamp(2rem, 9vw, 3.5rem); margin-bottom: 10px; }
+  .overlay p { font-size: clamp(1rem, 4.5vw, 1.4rem); margin-bottom: 25px; line-height: 1.5; max-width: 500px; }
+  .btn {
+    background: linear-gradient(45deg, #ff9ff3, #feca57); color: #7a2e8a;
+    border: none; padding: 16px 45px; font-size: 1.3rem; font-weight: bold;
+    border-radius: 50px; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  }
+  .btn:hover { transform: scale(1.07); }
+  .btn:active { transform: scale(0.95); }
+  .hidden { display: none !important; }
+  .rules { font-size: clamp(0.9rem, 4vw, 1.2rem); margin-bottom: 25px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="box">🌟 Točke: <span id="score">0</span></div>
+  <div class="box">Nivo: <span id="level">1</span></div>
+  <div class="box">❤️ <span id="lives">3</span></div>
+</div>
+
+<!-- Začetni zaslon -->
+<div class="overlay" id="startScreen">
+  <h1>🦄 Lov na samoroge 🦄</h1>
+  <div class="rules">
+    Lovi samoroge in mavrice! 🌈<br>
+    Izogibaj se oblakom z dežjem ⛈️<br>
+    Vsak spuščen samorog = izgubljeno srce ❤️
+  </div>
+  <button class="btn" onclick="startGame()">IGRAJ! ✨</button>
+</div>
+
+<!-- Konec igre -->
+<div class="overlay hidden" id="endScreen">
+  <h1>Konec igre! 🎉</h1>
+  <p>Dosegla si <span id="finalScore">0</span> točk!<br><span id="praise"></span></p>
+  <button class="btn" onclick="startGame()">Še enkrat! 🔄</button>
+</div>
+
+<script>
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const livesEl = document.getElementById('lives');
+  const startScreen = document.getElementById('startScreen');
+  const endScreen = document.getElementById('endScreen');
+
+  let score, lives, level, spawnTimer, gameActive, fallers;
+
+  // dobre stvari (točke) in slabe stvari (izgubiš srce ob kliku)
+  const good = ['🦄','🌈','⭐','🍭','💖','🌸'];
+  const bad = ['⛈️','☁️'];
+
+  function startGame() {
+    score = 0; lives = 3; level = 1; gameActive = true; fallers = [];
+    scoreEl.textContent = 0;
+    livesEl.textContent = 3;
+    levelEl.textContent = 1;
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    // odstrani stare padajoče elemente
+    document.querySelectorAll('.faller').forEach(f => f.remove());
+    clearInterval(spawnTimer);
+    scheduleSpawn();
+    requestAnimationFrame(loop);
+  }
+
+  function scheduleSpawn() {
+    clearInterval(spawnTimer);
+    // hitrejše spawnanje z višjim nivojem
+    const interval = Math.max(500, 1400 - level * 120);
+    spawnTimer = setInterval(spawn, interval);
+  }
+
+  function spawn() {
+    if (!gameActive) return;
+    const isBad = Math.random() < 0.22; // ~22% možnost slabega
+    const emoji = isBad
+      ? bad[Math.floor(Math.random() * bad.length)]
+      : good[Math.floor(Math.random() * good.length)];
+
+    const el = document.createElement('div');
+    el.className = 'faller';
+    el.textContent = emoji;
+    const size = 2.5 + Math.random() * 1.5;
+    el.style.fontSize = size + 'rem';
+    const maxX = window.innerWidth - 60;
+    el.style.left = Math.random() * maxX + 'px';
+    el.style.top = '-70px';
+
+    const speed = (2 + Math.random() * 1.5) + level * 0.4;
+    const faller = { el, y: -70, speed, isBad, caught: false };
+
+    const handleCatch = (e) => {
+      e.preventDefault();
+      if (faller.caught || !gameActive) return;
+      faller.caught = true;
+      if (isBad) {
+        loseLife(el);
+        showPop(el, '-1 ❤️');
+      } else {
+        score += 10;
+        scoreEl.textContent = score;
+        showPop(el, '+10');
+        checkLevel();
+      }
+      el.remove();
+      fallers = fallers.filter(f => f !== faller);
+    };
+    el.addEventListener('click', handleCatch);
+    el.addEventListener('touchstart', handleCatch, { passive: false });
+
+    document.body.appendChild(el);
+    fallers.push(faller);
+  }
+
+  function loop() {
+    if (!gameActive) return;
+    const h = window.innerHeight;
+    for (let i = fallers.length - 1; i >= 0; i--) {
+      const f = fallers[i];
+      f.y += f.speed;
+      f.el.style.top = f.y + 'px';
+      // padel na tla
+      if (f.y > h) {
+        // če je bil dober in ni ujet -> izgubiš srce
+        if (!f.isBad && !f.caught) {
+          loseLife(null);
+        }
+        f.el.remove();
+        fallers.splice(i, 1);
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function loseLife(el) {
+    lives--;
+    livesEl.textContent = Math.max(0, lives);
+    if (lives <= 0) gameOver();
+  }
+
+  function checkLevel() {
+    const newLevel = Math.floor(score / 100) + 1;
+    if (newLevel > level) {
+      level = newLevel;
+      levelEl.textContent = level;
+      scheduleSpawn();
+    }
+  }
+
+  function showPop(el, text) {
+    const pop = document.createElement('div');
+    pop.className = 'pop';
+    pop.textContent = text;
+    pop.style.left = el.style.left;
+    pop.style.top = el.style.top;
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 800);
+  }
+
+  function gameOver() {
+    gameActive = false;
+    clearInterval(spawnTimer);
+    document.getElementById('finalScore').textContent = score;
+    let praise = 'Odlično opravljeno! 💪';
+    if (score >= 300) praise = 'WOW, prava šampionka! 🏆';
+    else if (score >= 150) praise = 'Super igra! 🌟';
+    else if (score < 50) praise = 'Vaja dela mojstra! 😊';
+    document.getElementById('praise').textContent = praise;
+    setTimeout(() => endScreen.classList.remove('hidden'), 400);
+  }
+</script>
+</body>
+</html>
